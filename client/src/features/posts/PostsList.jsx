@@ -34,7 +34,7 @@ function PostsList() {
         <div>
             {posts.map((post) => (
                 <div key={post.id} className="post-container">
-                    <h2>{post.title}<spam><Link to="posts/:id"> Edit</Link></spam></h2>
+                    <h2>{post.title}</h2>
                     <p>{post.body}</p>                    
                 </div>
             ))}
