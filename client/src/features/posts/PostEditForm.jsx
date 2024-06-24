@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { API_URL } from "../../constants";
+import { fetchPost, updatePost } from "../../services/postService";
 
 function PostEditForm(){
    const [post, setPost] = useState(null);
@@ -11,20 +11,15 @@ function PostEditForm(){
 
    useEffect(() => {
       // Fetch the current post by id
+      // Why not response instead of json? Refactor later maybe.
       const fetchCurrentPost = async () => {
          try {
-               const response = await fetch(`${API_URL}/${id}`);
-               if (response.ok) {
-                  const json = await response.json();
-                  setPost(json);
-               } else {
-                  throw response;
-               } 
+            const json = await fetchPost(id);               
+            setPost(json);
          } catch (e) {
-               console.log("An error ocurred", e);
-               setError(e);
+            setError(e);
          } finally {
-               setLoading(false);
+            setLoading(false);
          }
       };
       fetchCurrentPost();
@@ -33,28 +28,18 @@ function PostEditForm(){
    const handleSubmit = async (e) => {
       e.preventDefault();
 
+      const updatedPost = { 
+         title: post.title,
+         body: post.body,
+      };
+
       try {
-         const response = await fetch(`${API_URL}/${id}`, {
-               method: "PUT",
-               headers: {
-                  "Content-Type": "application/json",
-               },
-               body: JSON.stringify({
-                  title: post.title,
-                  body: post.body,
-               }),
-         });
-         if (response.ok) {
-               const json = await response.json();
-               console.log("Success", json);
-               navigate(`/posts/${id}`);
-         } else {
-               throw response;
-         }
+         const response = await updatePost(id, updatedPost);
+         navigate(`/posts/${response.id}`);
       } catch (e) {
-         console.log("An error occurred", e);
-      }
+         console.error("Failed to update post ", e);   
    };
+}
 
    if (!post) return <h2>Loading...</h2>;
 
