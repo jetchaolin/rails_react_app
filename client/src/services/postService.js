@@ -1,7 +1,7 @@
 import { API_URL } from "../constants";
 
 // Index posts
-async function fetchAllPosts() {
+async function fetchAllPosts() { 
   const response = await fetch(`${API_URL}`);
   if (!response.ok) {
     throw new Error(response.statusText);
