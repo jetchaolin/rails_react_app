@@ -21,18 +21,17 @@ async function fetchPost(id) {
 async function createPost(postData) {
   const response = await fetch(`${API_URL}`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(postData),
+    // Doesn't need headers because it's a formData
+    body: postData,
   });
 
-  if (!response) {
+  if (!response.ok) {
     throw new Error(response.statusText);
   }
 
   return response.json();
 }
+
 // Update a post
 async function updatePost(id, postData) {
   const response = await fetch(`${API_URL}/${id}`, {
@@ -43,10 +42,9 @@ async function updatePost(id, postData) {
     body: JSON.stringify(postData),
   });
 
-  if (!response) {
+  if (!response.ok) {
     throw new Error(response.statusText);
   }
-
   return response.json();
 }
 // Delete a post
@@ -59,7 +57,8 @@ async function deletePost(id) {
   if (response.status === 204) {
     return null;
   }
-  return response.json();
+
+  throw new Error(response.statusText);
 }
 
 export { createPost, deletePost, fetchAllPosts, fetchPost, updatePost };
