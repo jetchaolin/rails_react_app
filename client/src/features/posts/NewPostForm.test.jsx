@@ -1,12 +1,12 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { BrowserRouter as Router } from "react-router-dom";
 import { act } from "react";
-// Custom stuff ew made
+// Custom stuff we made
 import NewPostForm from "./NewPostForm";
 import { createPost } from "../../services/postService";
 
 jest.mock("../../services/postService", () => ({
-   // Gonna need to return a id, title, body
+   // Gonna need to return an id, title, body
    createPost: jest.fn(() => {
       return {
          id: 1,
