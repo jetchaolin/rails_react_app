@@ -57,16 +57,16 @@ describe("PostEditForm component", () => {
          body: "New Post Body.",
       };
 
-      fireEvent.change(screen.getByLabelText(/Title/i), {
+      fireEvent.change(screen.getByLabelText(/Title:/i), {
          target: { value: newPost.title },
       });
 
-      fireEvent.change(screen.getByLabelText(/Body/i), {
+      fireEvent.change(screen.getByLabelText(/Body:/i), {
          target: { value: newPost.body },
       });
 
       await act(async () => {
-         fireEvent.click(screen.getByText(/Save/i));
+         fireEvent.click(screen.getByText(/Update Post/i));
       });
 
       await waitFor(() => {
@@ -86,7 +86,7 @@ describe("PostEditForm component", () => {
       renderForm();
 
       await waitFor(() => {
-         fireEvent.click(screen.getByText(/save/i));
+         fireEvent.click(screen.getByText(/Update Post/i));
       });
 
       await waitFor(() => {
