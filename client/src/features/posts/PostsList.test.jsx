@@ -16,8 +16,8 @@ global.console.error = jest.fn();
 
 describe("PostsList component", () => {
    const mockPosts = [
-      { id: 1, title: "Post 1", body: "Hello World" },
-      { id: 2, title: "Post 2", body: "Hello World" },
+      { id: 1, title: "Post 1", image: null, body: "Hello World" },
+      { id: 2, title: "Post 2", image: null, body: "Hello World" },
    ];
 
    beforeEach(() => {
@@ -79,5 +79,8 @@ describe("PostsList component", () => {
             deleteError
          );
       });
+   });
+
+   test("", async () => {
    });
 });
