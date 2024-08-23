@@ -27,8 +27,8 @@ function getFormKey(namespace, propertyName) {
 }
 
 function appendToFormData(formData, formKey, value) {
-  // Date || Object != file || something else
   debugger;
+  // Date || Object != file || something else
   if (value instanceof Date) {
     appendAsDate(formData, formKey, value);
   } else if (isObjectButNotFile(value)) {
@@ -44,4 +44,12 @@ function appendAsDate(formData, formKey, date) {
 
 function isObjectButNotFile(value) {
   return typeof value === "object" && !(value instanceof File);
+}
+
+export function formDataToObject(formData) {
+  const obj = {};
+  for (let key of formData.keys()) {
+    obj[key] = formData.get(key);
+  }
+  return obj;
 }

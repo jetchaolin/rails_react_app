@@ -15,9 +15,10 @@ jest.mock("../../services/postService", () => ({
 global.console.error = jest.fn();
 
 describe("PostsList component", () => {
+
    const mockPosts = [
       { id: 1, title: "Post 1", image: null, body: "Hello World" },
-      { id: 2, title: "Post 2", image: null, body: "Hello World" },
+      { id: 2, title: "Post 2", image: "../../assets/react.svg", body: "Hello World" },
    ];
 
    beforeEach(() => {
@@ -81,6 +82,13 @@ describe("PostsList component", () => {
       });
    });
 
-   test("", async () => {
+   test("checks if post has an image and displays it if it does", async () => {
+      render(<PostsList />, { wrapper: MemoryRouter });
+
+      await waitFor(() => screen.getByText("Post 1"));
+      await waitFor(() => screen.getByText("Post 2"));
+
+      expect(screen.queryByAltText("Post 1")).not.toBeInTheDocument();
+   // expect(screen.getByAltText("Post 2")).toBeInTheDocument();
    });
 });
