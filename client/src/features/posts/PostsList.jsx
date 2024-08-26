@@ -50,7 +50,7 @@ function PostsList() {
                         className="post-image"
                      />
                   ) : (
-                        <div className="post-image-stub">
+                        <div className="post-image-stub" data-testid="post-image-stub">
                         <svg
                            xmlns="http://www.w3.org/2000/svg"
                            shape-rendering="geometricPrecision"

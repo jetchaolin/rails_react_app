@@ -39,7 +39,8 @@ describe("PostForm component", () => {
    it("should allow selecting an image", () => {
       const { getByLabelText } = render(<PostForm post={mockPost} />);
       const imageInput = getByLabelText(/Image:/i);
-      const newImage = "new-image.png";
+      const newImage = new File(["sample"], "sample.png", { type: "image/png" });
+
       fireEvent.change(imageInput, { target: { files: newImage } });
       expect(imageInput.files).toBe(newImage);
    });

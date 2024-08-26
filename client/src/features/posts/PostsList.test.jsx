@@ -18,7 +18,7 @@ describe("PostsList component", () => {
 
    const mockPosts = [
       { id: 1, title: "Post 1", image: null, body: "Hello World" },
-      { id: 2, title: "Post 2", image: "../../assets/react.svg", body: "Hello World" },
+      { id: 2, title: "Post 2", image: "https://via.placeholder.com/150", body: "Hello World" },
    ];
 
    beforeEach(() => {
@@ -82,13 +82,56 @@ describe("PostsList component", () => {
       });
    });
 
-   test("checks if post has an image and displays it if it does", async () => {
+   // test("checks if post has an image and displays it if it does", async () => {
+   //    render(<PostsList />, { wrapper: MemoryRouter });
+
+   //    await waitFor(() => screen.getByText("Post 1"));
+   //    await waitFor(() => screen.getByText("Post 2"));
+
+   //    expect(screen.queryByAltText("Post 1")).not.toBeInTheDocument();
+   //    expect(screen.getByAltText("Post 2")).toBeInTheDocument();
+   // });
+});
+
+describe("PostsList component image_url rendering", () => {
+   const mockPostWithImageUrl = [
+      {
+         id: 1,
+         title: "Post with Image",
+         body: "Hello Image",
+         image_url: "https://via.placeholder.com/150",
+      },
+   ];
+
+   const mockPostWithoutImageUrl = [
+      {
+         id: 2,
+         title: "Post without Image",
+         body: "Hello Placeholder",
+         image_url: null,
+      },
+   ];
+
+   test("renders the image with image_url exists", async () => {
+      postsService.fetchAllPosts.mockResolvedValue(mockPostWithImageUrl);
+
       render(<PostsList />, { wrapper: MemoryRouter });
 
-      await waitFor(() => screen.getByText("Post 1"));
-      await waitFor(() => screen.getByText("Post 2"));
+      await waitFor(() => screen.getByText(mockPostWithImageUrl[0].title));
 
-      expect(screen.queryByAltText("Post 1")).not.toBeInTheDocument();
-   // expect(screen.getByAltText("Post 2")).toBeInTheDocument();
+      const imgElement = screen.getByAltText(mockPostWithImageUrl[0].title);
+      expect(imgElement).toBeInTheDocument();
+      expect(imgElement.src).toBe(mockPostWithImageUrl[0].image_url);
+   });
+
+   test("renders the placeholder div when image_url does not exist", async () => {
+      postsService.fetchAllPosts.mockResolvedValue(mockPostWithoutImageUrl);
+
+      render(<PostsList />, { wrapper: MemoryRouter });
+
+      await waitFor(() => screen.getByText(mockPostWithoutImageUrl[0].title));
+
+      const placeholderDiv = screen.getByTestId("post-image-stub");
+      expect(placeholderDiv).toBeInTheDocument();
    });
 });
