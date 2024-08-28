@@ -1,16 +1,27 @@
-import { API_URL } from "../constants";
+import { POSTS_API_URL, SEARCH_API_URL } from "../constants";
 
 // Index posts
 async function fetchAllPosts() {
-  const response = await fetch(`${API_URL}`);
+  const response = await fetch(`${POSTS_API_URL}`);
   if (!response.ok) {
     throw new Error(response.statusText);
   }
   return response.json();
 }
+
+// Index posts based on user search
+async function searchPosts(searchTerm) {
+  console.log("postService: ", searchTerm);
+  const response = await fetch(`${SEARCH_API_URL}/posts?q=${searchTerm}`);
+  if (!response.ok) {
+    throw new Error(response.statusText);
+  }
+  return response.json();
+}
+
 // Show a post
 async function fetchPost(id) {
-  const response = await fetch(`${API_URL}/${id}`);
+  const response = await fetch(`${POSTS_API_URL}/${id}`);
   if (!response.ok) {
     throw new Error(response.statusText);
   }
@@ -18,7 +29,7 @@ async function fetchPost(id) {
 }
 // Create a post
 async function createPost(postData) {
-  const response = await fetch(`${API_URL}`, {
+  const response = await fetch(`${POSTS_API_URL}`, {
     method: "POST",
     // Doesn't need headers because it's a formData
     body: postData,
@@ -33,7 +44,7 @@ async function createPost(postData) {
 
 // Update a post
 async function updatePost(id, postData) {
-  const response = await fetch(`${API_URL}/${id}`, {
+  const response = await fetch(`${POSTS_API_URL}/${id}`, {
     method: "PUT",
     body: postData,
   });
@@ -45,7 +56,7 @@ async function updatePost(id, postData) {
 }
 // Delete a post
 async function deletePost(id) {
-  const response = await fetch(`${API_URL}/${id}`, {
+  const response = await fetch(`${POSTS_API_URL}/${id}`, {
     method: "DELETE",
   });
 
@@ -57,4 +68,11 @@ async function deletePost(id) {
   throw new Error(response.statusText);
 }
 
-export { createPost, deletePost, fetchAllPosts, fetchPost, updatePost };
+export {
+  createPost,
+  deletePost,
+  fetchAllPosts,
+  fetchPost,
+  searchPosts,
+  updatePost,
+};
