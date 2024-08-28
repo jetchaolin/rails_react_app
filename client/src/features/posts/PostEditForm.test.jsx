@@ -59,7 +59,7 @@ describe("PostEditForm component", () => {
          image: null,
       };
 
-      const newForm = objectToFormData({ post: newPost });
+      const formData = objectToFormData({ post: newPost });
 
       fireEvent.change(screen.getByLabelText(/Title:/i), {
          target: { value: newPost.title },
@@ -79,7 +79,7 @@ describe("PostEditForm component", () => {
 
       await waitFor(() => {
          expect(updatePost).toHaveBeenCalledTimes(1);
-         expect(updatePost).toHaveBeenCalledWith("1", newForm);
+         expect(updatePost).toHaveBeenCalledWith("1", formData);
       });
 
       expect(screen.getByText("Post Detail")).toBeInTheDocument();

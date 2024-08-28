@@ -1,28 +1,49 @@
 // API_URL comes from the .env.development file
 import { useState, useEffect } from 'react';
-import { deletePost, fetchAllPosts } from "../../services/postService";
+import { deletePost } from "../../services/postService";
 import { Link } from 'react-router-dom';
+import SearchBar from './SearchBar';
 import "./PostsImage.css";
+
+import usePostsData from "../../hooks/usePostsData";
+import useURLSearchParam from "../../hooks/useURLSearchParam";
 
 function PostsList() {    
    const [posts, setPosts] = useState([]);
-   const [, setLoading] = useState(true);
-   const [, setError] = useState(null);
-   // Fetch posts from the API
+   const [searchTerm, setSearchTerm] = useState("");
+   const [deBouncedSearchTerm, setDeBouncedSearchTerm] = useURLSearchParam("search");
+
+   const {
+      posts: fetchedPosts,
+      loading,
+      error
+   } = usePostsData(deBouncedSearchTerm); // Note the change here
+
    useEffect(() => {
-      async function loadPosts() {
-         try {
-            const allPostsFetched = await fetchAllPosts();
-            setPosts(allPostsFetched);
-            setLoading(false);
-         } catch (e) {
-            setError(e);
-            setLoading(false);
-            console.error("Failed to fetch posts: ", e);
-         }
-      };
-      loadPosts();
-   }, []);
+      if (fetchedPosts) {
+         setPosts(fetchedPosts); // Update the posts state once fetchedPosts is available
+      }
+   }, [fetchedPosts]);
+   // Fetch posts from the API legacy
+   // useEffect(() => {
+   //    async function loadPosts() {
+   //       try {
+   //          const allPostsFetched = await fetchAllPosts();
+   //          const textChange = searchTerm
+   //          const searchedPosts = await searchPosts(textChange);
+   //          if (searchedPosts === "") {
+   //             setPosts(allPostsFetched);
+   //          }
+   //          setPosts(searchedPosts);
+   //          setLoading(false);
+   //       } catch (e) {
+   //          setError(e);
+   //          setLoading(false);
+   //          console.error("Failed to fetch posts: ", e);
+   //       }
+   //    };
+   //    loadPosts();
+   // }, [searchTerm]);
 
    const deletePostHandler = async (id) => {
       try {
@@ -33,8 +54,28 @@ function PostsList() {
       }
    };
 
+   const handleImmediateChange = (searchValue) => {
+      setSearchTerm(searchValue);
+   };
+
+   const handleDebouncedChange = (searchValue) => {
+      setDeBouncedSearchTerm(searchValue);
+   };
+
+   // function handleSearchTextChange() {
+   //    const searchTextValue = event.target.value;
+   //    setSearchTerm(searchTextValue);
+   // }
+
    return (
       <div>
+         <SearchBar
+            value={searchTerm}
+            onSearchTextChange={handleDebouncedChange}
+            onImmediateChange={handleImmediateChange}
+         />
+         {loading && <p>Loading...</p>}
+         {error && <p>Error loading posts.</p>}
          {posts.map((post) => (
             <div key={post.id} className="post-container">
                <h2>
@@ -53,11 +94,11 @@ function PostsList() {
                         <div className="post-image-stub" data-testid="post-image-stub">
                         <svg
                            xmlns="http://www.w3.org/2000/svg"
-                           shape-rendering="geometricPrecision"
-                           text-rendering="geometricPrecision"
-                           image-rendering="optimizeQuality"
+                              shapeRendering="geometricPrecision"
+                              textRendering="geometricPrecision"
+                              imageRendering="optimizeQuality"
                               fillRule="evenodd"
-                           clip-rule="evenodd"
+                              clipRule="evenodd"
                            viewBox="-555 -300 1620 1000.54">
                            <path
                                  fillRule="nonzero"

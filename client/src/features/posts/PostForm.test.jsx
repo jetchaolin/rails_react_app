@@ -45,11 +45,6 @@ describe("PostForm component", () => {
       consoleSpy.mockImplementation(() => { });
 
       fireEvent.change(imageInput, { target: { files: newImage } });
-      console.log(
-         imageInput.files,
-         newImage["name"],
-         newImage["type"],
-      );
       expect(imageInput.files).toBe(newImage);
    });
 
