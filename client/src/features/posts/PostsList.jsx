@@ -1,29 +1,45 @@
 // API_URL comes from the .env.development file
 import { useState, useEffect } from 'react';
 import { deletePost } from "../../services/postService";
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import SearchBar from './SearchBar';
 import "./PostsImage.css";
 
 import usePostsData from "../../hooks/usePostsData";
 import useURLSearchParam from "../../hooks/useURLSearchParam";
+import Pagination from './Pagination';
 
-function PostsList() {    
-   const [posts, setPosts] = useState([]);
+function PostsList() {  
    const [searchTerm, setSearchTerm] = useState("");
-   const [deBouncedSearchTerm, setDeBouncedSearchTerm] = useURLSearchParam("search");
+   const [debouncedSearchTerm, setDebouncedSearchTerm] = useURLSearchParam("search");
 
+   const [searchParams, setSearchParams] = useSearchParams();
+
+   const initialPageFromURL = Number(searchParams.get("page") || "1")
+   const [currentPage, setCurrentPage] = useState(initialPageFromURL);
+
+   const [posts, setPosts] = useState([]);
    const {
       posts: fetchedPosts,
+      totalPosts,
       loading,
-      error
-   } = usePostsData(deBouncedSearchTerm); // Note the change here
+      error,
+      perPage,
+   } = usePostsData(debouncedSearchTerm, currentPage); // Note the change here
 
    useEffect(() => {
       if (fetchedPosts) {
          setPosts(fetchedPosts); // Update the posts state once fetchedPosts is available
       }
    }, [fetchedPosts]);
+
+   useEffect(() => {
+      const initialSearchTerm = searchParams.get("search") || "";
+      setSearchTerm(initialSearchTerm);
+
+      const pageFromURL = searchParams.get("page") || "1";
+      setCurrentPage(Number(pageFromURL));
+   }, [searchParams]);
    // Fetch posts from the API legacy
    // useEffect(() => {
    //    async function loadPosts() {
@@ -48,7 +64,7 @@ function PostsList() {
    const deletePostHandler = async (id) => {
       try {
          await deletePost(id);
-         setPosts(posts.filter((post) => post.id !== id));
+         setPosts((prevPosts) => prevPosts.filter((post) => post.id !== id));
       } catch (e) {
          console.error("Failed to delete post: ", e);
       }
@@ -59,8 +75,15 @@ function PostsList() {
    };
 
    const handleDebouncedChange = (searchValue) => {
-      setDeBouncedSearchTerm(searchValue);
+      setDebouncedSearchTerm(searchValue);
    };
+
+   const handlePageChange = (page) => {
+      setCurrentPage(page);
+
+      // Update the URL to include the page number
+      setSearchParams({ search: debouncedSearchTerm, page: page });
+   }
 
    // function handleSearchTextChange() {
    //    const searchTextValue = event.target.value;
@@ -73,6 +96,12 @@ function PostsList() {
             value={searchTerm}
             onSearchTextChange={handleDebouncedChange}
             onImmediateChange={handleImmediateChange}
+         />
+         <Pagination
+            totalPosts={totalPosts}
+            postsPerPage={perPage}
+            currentPage={currentPage}
+            onPageChange={handlePageChange}
          />
          {loading && <p>Loading...</p>}
          {error && <p>Error loading posts.</p>}
