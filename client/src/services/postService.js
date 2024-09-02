@@ -1,8 +1,8 @@
 import { POSTS_API_URL, SEARCH_API_URL } from "../constants";
 
 // Index posts
-async function fetchAllPosts() {
-  const response = await fetch(`${POSTS_API_URL}`);
+async function fetchAllPosts(page = 1) {
+  const response = await fetch(`${POSTS_API_URL}?page=${page}`);
   if (!response.ok) {
     throw new Error(response.statusText);
   }
@@ -10,9 +10,10 @@ async function fetchAllPosts() {
 }
 
 // Index posts based on user search
-async function searchPosts(searchTerm) {
-  console.log("postService: ", searchTerm);
-  const response = await fetch(`${SEARCH_API_URL}/posts?q=${searchTerm}`);
+async function searchPosts(query, page = 1) {
+  const response = await fetch(
+    `${SEARCH_API_URL}/posts?q=${query}&page=${page}`
+  );
   if (!response.ok) {
     throw new Error(response.statusText);
   }
