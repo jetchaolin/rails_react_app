@@ -67,7 +67,7 @@ function Pagination({ totalPosts, postsPerPage, currentPage, onPageChange }) {
             {page}
           </button>
         ) : (
-          <span key={`ellipsis-${index}`} style={{ margin: "0 5px" }}>
+            <span key={`ellipsis-${index}`} data-testid="ellipsis" style={{ margin: "0 5px" }}>
             {page}
           </span>
         )
