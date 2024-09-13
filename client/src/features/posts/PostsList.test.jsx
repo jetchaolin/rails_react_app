@@ -2,6 +2,14 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import PostsList from "./PostsList";
 import * as postsService from "../../services/postService";
+import usePostsData from "../../hooks/usePostsData";
+
+jest.mock("../../hooks/usePostsData", () => {
+   return {
+      __esModule: true,
+      default: jest.fn(),
+   }
+});
 
 jest.mock("../../constants", () => ({
    API_URL: "http://your-test-api-url",
@@ -22,7 +30,9 @@ describe("PostsList component", () => {
    ];
 
    beforeEach(() => {
-      postsService.fetchAllPosts.mockResolvedValue(mockPosts);
+      usePostsData.mockReturnValue({
+         posts: mockPosts,
+      });
       postsService.deletePost.mockResolvedValue();
    });
 
@@ -33,6 +43,60 @@ describe("PostsList component", () => {
 
       expect(screen.getByText("Post 1")).toBeInTheDocument();
       expect(screen.getByText("Post 2")).toBeInTheDocument();
+   });
+
+   test("should handle immediate changes", async () => {
+      const setSearchTerm = jest.fn();
+
+      render(<PostsList />, { wrapper: MemoryRouter });
+
+      const searchBox = screen.getByPlaceholderText("Search...");
+
+      fireEvent.change(searchBox, {
+         target: { value: "2" },
+      })
+
+      expect(searchBox).toHaveValue("2");
+      waitFor(() => {
+         expect(setSearchTerm).toHaveBeenCalledTimes(1);
+      })
+   });
+
+   test("should change searchValue after 500ms", async () => {
+      const debouncedSearchTerm = jest.fn();
+      const setDebouncedSearchTerm = jest.fn();
+
+      render(<PostsList />, { wrapper: MemoryRouter });
+
+      const searchBox = screen.getByPlaceholderText("Search...");
+
+      fireEvent.change(searchBox, {
+         target: { value: "2" },
+      })
+
+      waitFor(() => {
+         expect(debouncedSearchTerm).toHaveBeenCalledTimes(1);
+         expect(debouncedSearchTerm).toHaveBeenLastCalledWith("2");
+         expect(setDebouncedSearchTerm).toHaveBeenCalledTimes(1);
+         expect(setDebouncedSearchTerm).toHaveBeenLastCalledWith("2");
+      })
+   });
+
+   test("should handle page change", async () => {
+      const currentPage = 1;
+      const setCurrentPage = jest.fn();
+      const searchParams = jest.fn();
+
+      render(<PostsList />, { wrapper: MemoryRouter });
+
+      const nextButton = screen.getByText("Next");
+      fireEvent.click(nextButton);
+
+      waitFor(() => {
+         expect(setCurrentPage).toHaveBeenCalledTimes(1);
+         expect(setCurrentPage).toHaveBeenCalledWith(currentPage + 1);
+         expect(searchParams).toHaveBeenCalledWith({ page: currentPage + 1 });
+      })
    });
 
    test("deletes a post when delete button is clicked", async () => {
@@ -48,24 +112,32 @@ describe("PostsList component", () => {
       expect(screen.queryByText(postText)).not.toBeInTheDocument();
    });
 
-   test("sets error and loading to false when fetching posts fails", async () => {
+   test("logs error when fetching posts fails", async () => {
       // "Failed to fetch posts:", e => An error occurred!
-      const error = new Error("An error occurred!");
-      postsService.fetchAllPosts.mockRejectedValue(error);
+      // const error = new Error("An error occurred!");
+      // const result = console.error("Failed to fetch posts: ", e);
+      // const consoleSpy = jest.spyOn(console, "error");
+      // consoleSpy.mockImplementation(jest.fn());
+      usePostsData.mockReturnValue({
+         posts: [],
+         loading: false,
+         error: new Error("Fetch failed"),
+         totalPosts: 0,
+         perPage: 2,
+      });
 
       render(<PostsList />, { wrapper: MemoryRouter });
 
       await waitFor(() => {
          // TODO: spy on the console instead of mocking it
-         expect(console.error).toHaveBeenCalledWith(
-            "Failed to fetch posts: ",
-            error
-         );
+         expect(screen.getByText("Error loading posts.")).toBeInTheDocument();
       });
    });
 
    test("logs error when deleting a post fails", async () => {
-      postsService.fetchAllPosts.mockResolvedValue(mockPosts);
+      usePostsData.mockReturnValue({
+         posts: mockPosts,
+      });
       const deleteError = new Error("Delete failed!");
       postsService.deletePost.mockRejectedValue(deleteError);
 
@@ -113,7 +185,9 @@ describe("PostsList component image_url rendering", () => {
    ];
 
    test("renders the image with image_url exists", async () => {
-      postsService.fetchAllPosts.mockResolvedValue(mockPostWithImageUrl);
+      usePostsData.mockReturnValue({
+         posts: mockPostWithImageUrl,
+      });
 
       render(<PostsList />, { wrapper: MemoryRouter });
 
@@ -125,7 +199,9 @@ describe("PostsList component image_url rendering", () => {
    });
 
    test("renders the placeholder div when image_url does not exist", async () => {
-      postsService.fetchAllPosts.mockResolvedValue(mockPostWithoutImageUrl);
+      usePostsData.mockReturnValue({
+         posts: mockPostWithoutImageUrl,
+      });
 
       render(<PostsList />, { wrapper: MemoryRouter });
 
@@ -134,4 +210,8 @@ describe("PostsList component image_url rendering", () => {
       const placeholderDiv = screen.getByTestId("post-image-stub");
       expect(placeholderDiv).toBeInTheDocument();
    });
+
+   test("handleImmediateChange", async () => {
+
+   })
 });

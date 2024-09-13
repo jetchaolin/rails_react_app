@@ -5,6 +5,7 @@ import {
   updatePost,
   deletePost,
   fetchAllPosts,
+  searchPosts,
 } from "./postService";
 
 fetchMock.enableMocks();
@@ -29,6 +30,16 @@ describe("Post API Service", () => {
 
     expect(result).toEqual(mockData);
   });
+  // Index search
+  it("searches posts", async () => {
+    const mockData = [{ id: 1, title: "Test Post", body: "Case" }];
+    fetch.mockResponseOnce(JSON.stringify(mockData));
+
+    const result = await searchPosts("test");
+
+    expect(result).toEqual(mockData);
+  });
+
   // Show
   it("fetches a single post", async () => {
     const mockPostID = 1;
@@ -84,6 +95,12 @@ describe("Post API Service", () => {
 
     // We expect the service to throw an error.
     await expect(fetchAllPosts()).rejects.toThrow();
+  });
+
+  it("throws an error when the searchPosts response is not ok", async () => {
+    fetch.mockResponseOnce(JSON.stringify({}), { status: 500 });
+
+    await expect(searchPosts("test")).rejects.toThrow();
   });
 
   it("throws an error when the fetchPost response is not ok", async () => {
