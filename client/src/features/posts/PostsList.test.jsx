@@ -1,8 +1,9 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, useSearchParams } from "react-router-dom";
 import PostsList from "./PostsList";
 import * as postsService from "../../services/postService";
 import usePostsData from "../../hooks/usePostsData";
+import useURLSearchParam from "../../hooks/useURLSearchParam";
 
 jest.mock("../../hooks/usePostsData", () => {
    return {
@@ -11,12 +12,19 @@ jest.mock("../../hooks/usePostsData", () => {
    }
 });
 
-jest.mock("../../constants", () => ({
-   API_URL: "http://your-test-api-url",
-}));
+jest.mock("react-router-dom", () => {
+   const actual = jest.requireActual("react-router-dom");
+   return {
+      ...actual,
+      useSearchParams: jest.fn(actual.useSearchParams),
+   }
+});
+
+// jest.mock("../../constants", () => ({
+//    API_URL: "http://your-test-api-url",
+// }));
 
 jest.mock("../../services/postService", () => ({
-   fetchAllPosts: jest.fn(),
    deletePost: jest.fn(),
 }));
 
@@ -46,25 +54,24 @@ describe("PostsList component", () => {
    });
 
    test("should handle immediate changes", async () => {
-      const setSearchTerm = jest.fn();
 
       render(<PostsList />, { wrapper: MemoryRouter });
 
       const searchBox = screen.getByPlaceholderText("Search...");
+      const result = screen.getByText("Post 2");
 
       fireEvent.change(searchBox, {
          target: { value: "2" },
       })
 
       expect(searchBox).toHaveValue("2");
-      waitFor(() => {
-         expect(setSearchTerm).toHaveBeenCalledTimes(1);
-      })
+      expect(result).toBeInTheDocument();
+      // await waitFor(() => {
+      //    expect(searchTerm).toHaveBeenCalledTimes(1);
+      // })
    });
 
    test("should change searchValue after 500ms", async () => {
-      const debouncedSearchTerm = jest.fn();
-      const setDebouncedSearchTerm = jest.fn();
 
       render(<PostsList />, { wrapper: MemoryRouter });
 
@@ -74,28 +81,36 @@ describe("PostsList component", () => {
          target: { value: "2" },
       })
 
-      waitFor(() => {
-         expect(debouncedSearchTerm).toHaveBeenCalledTimes(1);
-         expect(debouncedSearchTerm).toHaveBeenLastCalledWith("2");
-         expect(setDebouncedSearchTerm).toHaveBeenCalledTimes(1);
-         expect(setDebouncedSearchTerm).toHaveBeenLastCalledWith("2");
+      await waitFor(() => {
+         expect(searchBox).toHaveValue("2");
+      // expect(debouncedSearchTerm).toHaveBeenCalledTimes(1);
+      // expect(debouncedSearchTerm).toHaveBeenLastCalledWith("2");
+      // expect(setDebouncedSearchTerm).toHaveBeenCalledTimes(1);
+      // expect(setDebouncedSearchTerm).toHaveBeenLastCalledWith("2");
       })
    });
 
    test("should handle page change", async () => {
-      const currentPage = 1;
-      const setCurrentPage = jest.fn();
-      const searchParams = jest.fn();
+      const setSearchParams = jest.fn();
+      useSearchParams.mockReturnValue([new URLSearchParams({ page: 1 }), setSearchParams])
 
       render(<PostsList />, { wrapper: MemoryRouter });
 
-      const nextButton = screen.getByText("Next");
-      fireEvent.click(nextButton);
+      // const searchBox = screen.getByPlaceholderText("Search...");
+      const nextButton = screen.getByText("2");
 
-      waitFor(() => {
-         expect(setCurrentPage).toHaveBeenCalledTimes(1);
-         expect(setCurrentPage).toHaveBeenCalledWith(currentPage + 1);
-         expect(searchParams).toHaveBeenCalledWith({ page: currentPage + 1 });
+      await waitFor(() => {
+         // fireEvent.change(searchBox, {
+         //    target: { value: "test" },
+         // })
+
+         fireEvent.click(nextButton);         
+      })
+
+      await waitFor(() => {
+         // expect(searchBox).toHaveValue("test");
+         expect(setSearchParams).toHaveBeenCalledTimes(1);
+         expect(setSearchParams).toHaveBeenCalledWith({ search: "", page: 2 });
       })
    });
 
