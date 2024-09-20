@@ -5,6 +5,10 @@ import React from "react";
 
 describe("SearchBar component", () => {
 
+  afterEach(() => {
+    jest.clearAllMocks();
+  })
+
   it("should handle event change", () => {
     const onSearchTextChange = jest.fn();
     const onImmediateChange = jest.fn();
